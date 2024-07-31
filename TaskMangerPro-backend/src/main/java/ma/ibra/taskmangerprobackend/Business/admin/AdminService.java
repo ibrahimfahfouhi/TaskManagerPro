@@ -1,15 +1,22 @@
 package ma.ibra.taskmangerprobackend.Business.admin;
 
+import jakarta.persistence.EntityNotFoundException;
+import ma.ibra.taskmangerprobackend.Business.utils.JwtUtil;
+import ma.ibra.taskmangerprobackend.Domain.dto.CommentDto;
 import ma.ibra.taskmangerprobackend.Domain.dto.TaskDto;
 import ma.ibra.taskmangerprobackend.Domain.dto.UserDto;
+import ma.ibra.taskmangerprobackend.Domain.entities.Comment;
 import ma.ibra.taskmangerprobackend.Domain.entities.Task;
 import ma.ibra.taskmangerprobackend.Domain.entities.User;
 import ma.ibra.taskmangerprobackend.Domain.enums.TaskStatus;
 import ma.ibra.taskmangerprobackend.Domain.enums.UserRole;
+import ma.ibra.taskmangerprobackend.Domain.repositories.CommentRepository;
 import ma.ibra.taskmangerprobackend.Domain.repositories.TaskRepository;
 import ma.ibra.taskmangerprobackend.Domain.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -19,10 +26,14 @@ import java.util.stream.Collectors;
 public class AdminService implements IAdminService{
     private final UserRepository _userRepository;
     private final TaskRepository _taskRepository;
+    private final CommentRepository _commentRepository;
+    private final JwtUtil jwtUtil;
 
-    public AdminService(UserRepository _userRepository, TaskRepository taskRepository) {
+    public AdminService(UserRepository _userRepository, TaskRepository taskRepository, CommentRepository commentRepository, JwtUtil jwtUtil) {
         this._userRepository = _userRepository;
         _taskRepository = taskRepository;
+        _commentRepository = commentRepository;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -93,6 +104,29 @@ public class AdminService implements IAdminService{
                 .stream()
                 .sorted(Comparator.comparing(Task::getDueDate).reversed())
                 .map(Task::getTaskDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public CommentDto createComment(Long taskId, String content) {
+        Optional<Task> optionalTask = _taskRepository.findById(taskId);
+        User user = jwtUtil.getLoggedInUser();
+        if (optionalTask.isPresent() && user != null) {
+            Comment comment = new Comment();
+            comment.setCreatedAt(LocalDate.now());
+            comment.setContent(content);
+            comment.setTask(optionalTask.get());
+            comment.setUser(user);
+            _commentRepository.save(comment).getCommentDto();
+        }
+        throw new EntityNotFoundException("User or Task not found");
+    }
+
+    @Override
+    public List<CommentDto> getCommentsByTask(Long taskId) {
+        return _commentRepository.findAllByTaskId(taskId)
+                .stream()
+                .map(Comment::getCommentDto)
                 .collect(Collectors.toList());
     }
 

@@ -40,8 +40,22 @@ export class AdminService {
       headers: this.createAuthorizationHeader()
     })
   }
+  getCommentsByTaskId(id: number): Observable<any>{
+    return this.http.get(base_url + "api/admin/taskComments/" + id, {
+      headers: this.createAuthorizationHeader()
+    })
+  }
   searchTask(title: string): Observable<any>{
     return this.http.get(base_url + "api/admin/searchTask/" + title, {
+      headers: this.createAuthorizationHeader()
+    })
+  }
+  createComment(id: number, content: string): Observable<any>{
+    const params = {
+      content: content
+    }
+    return this.http.post(base_url + "api/admin/createComment/" + id, null, {
+      params: params,
       headers: this.createAuthorizationHeader()
     })
   }

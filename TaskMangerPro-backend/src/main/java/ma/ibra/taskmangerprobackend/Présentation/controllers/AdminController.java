@@ -1,6 +1,7 @@
 package ma.ibra.taskmangerprobackend.Présentation.controllers;
 
 import ma.ibra.taskmangerprobackend.Business.admin.IAdminService;
+import ma.ibra.taskmangerprobackend.Domain.dto.CommentDto;
 import ma.ibra.taskmangerprobackend.Domain.dto.TaskDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +53,19 @@ public class AdminController {
     @GetMapping("/searchTask/{title}")
     public ResponseEntity<List<TaskDto>> searchTask(@PathVariable String title) {
         List<TaskDto> result = _adminService.searchTaskByTitle(title);
+        return ResponseEntity.ok().body(result);
+    }
+    @PostMapping("/createComment/{taskId}")
+    public ResponseEntity<CommentDto> createComment(@PathVariable Long taskId, @RequestParam String content) {
+        CommentDto result = _adminService.createComment(taskId, content);
+        if (result == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+    @GetMapping("/taskComments/{taskId}")
+    public ResponseEntity<List<CommentDto>> getCommentsByTaskId(@PathVariable Long taskId) {
+        List<CommentDto> result = _adminService.getCommentsByTask(taskId);
         return ResponseEntity.ok().body(result);
     }
 }

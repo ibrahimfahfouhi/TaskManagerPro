@@ -1,4 +1,5 @@
 package ma.ibra.taskmangerprobackend.Business.admin;
+import ma.ibra.taskmangerprobackend.Domain.dto.CommentDto;
 import ma.ibra.taskmangerprobackend.Domain.dto.TaskDto;
 import ma.ibra.taskmangerprobackend.Domain.dto.UserDto;
 
@@ -12,4 +13,6 @@ public interface IAdminService {
     TaskDto getTaskById(Long id);
     TaskDto updateTask(Long id, TaskDto taskDto);
     List<TaskDto> searchTaskByTitle(String title);
+    CommentDto createComment(Long taskId, String content);
+    List<CommentDto> getCommentsByTask(Long taskId);
 }
